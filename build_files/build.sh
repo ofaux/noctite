@@ -22,6 +22,11 @@ for repo in "${COPR_REPOS[@]}"; do
 		log "Warning: Failed to enable COPR repo $repo (may not support Fedora $RELEASE)"
 	fi
 done
+# Ensure the terra-repo is actually active and fetched
+dnf install -y 'dnf-command(config-manager)'
+dnf config-manager --set-enabled terra
+dnf clean all
+dnf makecache
 
 # --- 2. DEFINE PACKAGE LISTS ---
 # Noctalia specific dependencies verified: swww for walls, playerctl for media,
