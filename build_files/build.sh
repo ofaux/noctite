@@ -38,7 +38,7 @@ NIRI_PKGS=(
     niri
     playerctl
     brightnessctl
-    imagemagick
+    ImageMagick
     cava
     cliphist
     gnome-keyring
