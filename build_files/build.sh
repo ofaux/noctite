@@ -11,7 +11,7 @@ log() {
 log "Enabling Repositories (Terra, Ghostty, Niri)..."
 
 # Install Terra-Release to get the repo configs
-dnf5 install -y https://repos.terrapkg.org/terra-release-f$(rpm -E %fedora).noarch.rpm
+sudo dnf install --nogpgcheck --repofrompath 'terra,https://repos.fyralabs.com/terra$releasever' terra-release
 
 COPR_REPOS=(
     pgdev/ghostty
