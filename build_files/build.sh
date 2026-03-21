@@ -24,7 +24,8 @@ for repo in "${COPR_REPOS[@]}"; do
 done
 # Ensure the terra-repo is actually active and fetched
 dnf install -y 'dnf-command(config-manager)'
-dnf config-manager --set-enabled terra
+# The new dnf5 way to enable a repo
+dnf config-manager setopt terra.enabled=1
 dnf clean all
 dnf makecache
 
