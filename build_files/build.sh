@@ -7,31 +7,32 @@ log() {
 }
 
 # --- 1. ENABLE REPOSITORIES ---
-# We enable Terra via the release RPM, and keep your other necessary Coprs
 log "Enabling Repositories (Terra, Ghostty, Niri)..."
 
+# Ensure the terra repo file exists
+if [ ! -f /etc/yum.repos.d/terra.repo ]; then
+    dnf5 install -y https://repos.fyralabs.com/terra41/terra-release-41-2.noarch.rpm
+fi
 
-COPR_REPOS=(
-	pgdev/ghostty
-	ulysg/xwayland-satellite
-	yalter/niri
-)
-for repo in "${COPR_REPOS[@]}"; do
-	# Try to enable the repo, but don't fail the build if it doesn't support this Fedora version
-	if ! dnf5 -y copr enable "$repo" 2>&1; then
-		log "Warning: Failed to enable COPR repo $repo (may not support Fedora $RELEASE)"
-	fi
-done
-
-# Flip the enabled switch in the terra repo file
+# FORCE Terra to use Fedora 41 paths (Fedora 43 is too new for their mirrors)
+sed -i 's/\$releasever/41/g' /etc/yum.repos.d/terra.repo
+# Flip the enabled switch
 sed -i '0,/enabled=0/s//enabled=1/' /etc/yum.repos.d/terra.repo
 
-# Now refresh the metadata so DNF "sees" the new packages
-dnf makecache
+COPR_REPOS=(
+    pgdev/ghostty
+    ulysg/xwayland-satellite
+    yalter/niri
+)
+for repo in "${COPR_REPOS[@]}"; do
+    if ! dnf5 -y copr enable "$repo" 2>&1; then
+        log "Warning: Failed to enable COPR repo $repo"
+    fi
+done
+
+dnf5 makecache
 
 # --- 2. DEFINE PACKAGE LISTS ---
-# Noctalia specific dependencies verified: swww for walls, playerctl for media,
-# bc for math/logic in some scripts, and the essential noctalia-qs fork.
 NIRI_PKGS=(
     noctalia-shell
     noctalia-qs
@@ -48,9 +49,9 @@ NIRI_PKGS=(
     bc
     python3
     python3-pip
-	python3-pywal
     evolution-data-server
     wlsunset
+    python3-pywal  # Added here so DNF handles it from Terra
 )
 
 FONTS=(
@@ -64,29 +65,25 @@ ADDITIONAL_SYSTEM_APPS=(
 
 # --- 3. INSTALL ALL PACKAGES ---
 log "Installing packages..."
+# Using --skip-unavailable as a safety net for the bleeding-edge fc43
 dnf5 install --setopt=install_weak_deps=False -y \
     "${FONTS[@]}" \
     "${NIRI_PKGS[@]}" \
-    "${ADDITIONAL_SYSTEM_APPS[@]}"
+    "${ADDITIONAL_SYSTEM_APPS[@]}" \
+    --skip-unavailable
 
 # --- 4. PYWALFOX SYSTEM-WIDE SETUP ---
 log "Setting up Pywalfox..."
 
-# Ensure the target directory for the python libs exists.
-# We check if it's a directory first to avoid the 'File exists' error.
-if [ ! -d /usr/local/lib ]; then
-    mkdir -p /var/usrlocal/lib
-    # On some Bazzite builds, we may need to ensure the link is healthy
-    # but usually, simply creating the parent in /var is enough.
-fi
+# DO NOT try to mkdir /usr/local. 
+# Instead, ensure the native-messaging-hosts path exists (it is in /usr/lib64)
+mkdir -p /usr/lib64/mozilla/native-messaging-hosts/
 
-# Install pywalfox via pip
-# --prefix=/usr ensures the binary goes to /usr/bin
-# --break-system-packages is mandatory on Fedora 43
+# Install pywalfox to /usr/bin to avoid /usr/local/bin issues
+# Use --break-system-packages for Fedora 43+ compatibility
 pip install --prefix=/usr --break-system-packages pywalfox
 
-# Create the manifest for the native messaging host
-mkdir -p /usr/lib64/mozilla/native-messaging-hosts/
+# Create the manifest
 cat <<EOF > /usr/lib64/mozilla/native-messaging-hosts/pywalfox.json
 {
     "name": "pywalfox",
@@ -105,6 +102,5 @@ for repo in "${COPR_REPOS[@]}"; do
     dnf5 -y copr disable "$repo"
 done
 
-# Enable essential background services
 systemctl enable podman.socket
 systemctl enable uupd.timer
