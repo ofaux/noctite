@@ -13,16 +13,18 @@ log "Enabling Repositories (Terra, Ghostty, Niri)..."
 # Install Terra-Release to get the repo configs
 sudo dnf install --nogpgcheck --repofrompath 'terra,https://repos.fyralabs.com/terra$releasever' terra-release
 
-COPR_REPOS=(
-    pgdev/ghostty
-    ulysg/xwayland-satellite
-    yalter/niri
-)
 
+COPR_REPOS=(
+    avengemedia/dms
+	pgdev/ghostty
+	ulysg/xwayland-satellite
+	yalter/niri
+)
 for repo in "${COPR_REPOS[@]}"; do
-    if ! dnf5 -y copr enable "$repo" 2>&1; then
-        log "Warning: Failed to enable COPR repo $repo"
-    fi
+	# Try to enable the repo, but don't fail the build if it doesn't support this Fedora version
+	if ! dnf5 -y copr enable "$repo" 2>&1; then
+		log "Warning: Failed to enable COPR repo $repo (may not support Fedora $RELEASE)"
+	fi
 done
 
 # --- 2. DEFINE PACKAGE LISTS ---
