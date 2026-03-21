@@ -12,7 +12,6 @@ log "Enabling Repositories (Terra, Ghostty, Niri)..."
 
 
 COPR_REPOS=(
-    avengemedia/dms
 	pgdev/ghostty
 	ulysg/xwayland-satellite
 	yalter/niri
