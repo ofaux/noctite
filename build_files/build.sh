@@ -48,6 +48,7 @@ NIRI_PKGS=(
     bc
     python3
     python3-pip
+	python3-pywal
     evolution-data-server
     wlsunset
 )
@@ -71,19 +72,21 @@ dnf5 install --setopt=install_weak_deps=False -y \
 # --- 4. PYWALFOX SYSTEM-WIDE SETUP ---
 log "Setting up Pywalfox..."
 
-# Ensure the directories exists so pip doesn't choke
-mkdir -p /usr/local/lib
-mkdir -p /usr/lib64/mozilla/native-messaging-hosts/
+# Ensure the target directory for the python libs exists.
+# We check if it's a directory first to avoid the 'File exists' error.
+if [ ! -d /usr/local/lib ]; then
+    mkdir -p /var/usrlocal/lib
+    # On some Bazzite builds, we may need to ensure the link is healthy
+    # but usually, simply creating the parent in /var is enough.
+fi
 
-# Install pywal and pywalfox in one go
-# --prefix=/usr ensures it goes to /usr/bin instead of /usr/local/bin
-# --break-system-packages is REQUIRED on Fedora 43+ for system-wide pip
-pip install \
-    --prefix=/usr \
-    --break-system-packages \
-    pywal pywalfox
+# Install pywalfox via pip
+# --prefix=/usr ensures the binary goes to /usr/bin
+# --break-system-packages is mandatory on Fedora 43
+pip install --prefix=/usr --break-system-packages pywalfox
 
 # Create the manifest for the native messaging host
+mkdir -p /usr/lib64/mozilla/native-messaging-hosts/
 cat <<EOF > /usr/lib64/mozilla/native-messaging-hosts/pywalfox.json
 {
     "name": "pywalfox",
