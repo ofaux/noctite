@@ -11,7 +11,8 @@ log() {
 log "Enabling Repositories (Terra, Ghostty, Niri)..."
 
 # Install Terra-Release to get the repo configs
-sudo dnf install --nogpgcheck --repofrompath 'terra,https://repos.fyralabs.com/terra$releasever' terra-release
+curl -fsSL https://github.com/terrapkg/subatomic-repos/raw/main/terra.repo | pkexec tee /etc/yum.repos.d/terra.repo
+dnf5 install terra-release
 
 
 COPR_REPOS=(
