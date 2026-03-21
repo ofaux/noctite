@@ -22,11 +22,11 @@ for repo in "${COPR_REPOS[@]}"; do
 		log "Warning: Failed to enable COPR repo $repo (may not support Fedora $RELEASE)"
 	fi
 done
-# Ensure the terra-repo is actually active and fetched
-dnf install -y 'dnf-command(config-manager)'
-# The new dnf5 way to enable a repo
-dnf config-manager setopt terra.enabled=1
-dnf clean all
+
+# Flip the enabled switch in the terra repo file
+sed -i '0,/enabled=0/s//enabled=1/' /etc/yum.repos.d/terra.repo
+
+# Now refresh the metadata so DNF "sees" the new packages
 dnf makecache
 
 # --- 2. DEFINE PACKAGE LISTS ---
@@ -47,7 +47,6 @@ NIRI_PKGS=(
     libqalculate
     bc
     python3
-    python3-pywal
     python3-pip
     evolution-data-server
     wlsunset
@@ -72,6 +71,7 @@ dnf5 install --setopt=install_weak_deps=False -y \
 # --- 4. PYWALFOX SYSTEM-WIDE SETUP ---
 log "Setting up Pywalfox..."
 # Install the pywalfox daemon into the image's /usr path
+pip install pywal
 pip install --prefix=/usr pywalfox
 
 # Create the manifest for the native messaging host
