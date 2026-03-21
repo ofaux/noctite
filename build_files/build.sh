@@ -69,13 +69,14 @@ dnf5 install --setopt=install_weak_deps=False -y \
     "${ADDITIONAL_SYSTEM_APPS[@]}"
 
 # --- 4. PYWALFOX SYSTEM-WIDE SETUP ---
+# --- 4. PYWALFOX SYSTEM-WIDE SETUP ---
+
 log "Setting up Pywalfox..."
 
-# Ensure the directories exists so pip doesn't choke
-mkdir -p /usr/local/lib
+# Ensure the Mozilla native messaging directory exists
 mkdir -p /usr/lib64/mozilla/native-messaging-hosts/
 
-# Install pywal and pywalfox in one go
+# Install pywal and pywalfox
 # --prefix=/usr ensures it goes to /usr/bin instead of /usr/local/bin
 # --break-system-packages is REQUIRED on Fedora 43+ for system-wide pip
 pip install \
@@ -91,7 +92,7 @@ cat <<EOF > /usr/lib64/mozilla/native-messaging-hosts/pywalfox.json
     "path": "/usr/bin/pywalfox",
     "type": "stdio",
     "allowed_extensions": [
-        "pywalfox@fntne.com"
+        "pywalfox@frewacom.org"
     ]
 }
 EOF
