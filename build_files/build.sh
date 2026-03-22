@@ -80,7 +80,7 @@ pip install \
     --break-system-packages \
     pywal pywalfox
 	
-chmod +x $(python3 -c "import site; print(site.getsitepackages()[0])")/pywalfox/bin/main.sh
+find /usr/lib -name "main.sh" -path "*/pywalfox/bin/*" -exec chmod +x {} \;
 
 cat <<EOF > /usr/lib64/mozilla/native-messaging-hosts/pywalfox.json
 {
