@@ -1,7 +1,7 @@
 [customizations.installer.kickstart]
 contents = """
 %post
-bootc switch --mutate-in-place --transport registry ghcr.io/ofaux/noctite
+bootc switch --mutate-in-place --transport registry ghcr.io/ofaux/noctite:latest
 %end
 """
 
