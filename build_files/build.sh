@@ -41,7 +41,6 @@ NIRI_PKGS=(
     ImageMagick
     cava
     cliphist
-	mutagen
     gnome-keyring
     xdg-desktop-portal-gtk
     xwayland-satellite
