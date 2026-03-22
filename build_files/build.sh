@@ -73,18 +73,15 @@ dnf5 install --setopt=install_weak_deps=False -y \
 
 log "Setting up Pywalfox..."
 
-# Ensure the Mozilla native messaging directory exists
 mkdir -p /usr/lib64/mozilla/native-messaging-hosts/
 
-# Install pywal and pywalfox
-# --prefix=/usr ensures it goes to /usr/bin instead of /usr/local/bin
-# --break-system-packages is REQUIRED on Fedora 43+ for system-wide pip
 pip install \
     --prefix=/usr \
     --break-system-packages \
     pywal pywalfox
+	
+chmod +x $(python3 -c "import site; print(site.getsitepackages()[0])")/pywalfox/bin/main.sh
 
-# Create the manifest for the native messaging host
 cat <<EOF > /usr/lib64/mozilla/native-messaging-hosts/pywalfox.json
 {
     "name": "pywalfox",
