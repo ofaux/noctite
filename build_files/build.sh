@@ -68,31 +68,7 @@ dnf5 install --setopt=install_weak_deps=False -y \
     "${NIRI_PKGS[@]}" \
     "${ADDITIONAL_SYSTEM_APPS[@]}"
 
-# --- 4. PYWALFOX SYSTEM-WIDE SETUP ---
-# --- 4. PYWALFOX SYSTEM-WIDE SETUP ---
 
-log "Setting up Pywalfox..."
-
-mkdir -p /usr/lib64/mozilla/native-messaging-hosts/
-
-pip install \
-    --prefix=/usr \
-    --break-system-packages \
-    pywal pywalfox
-	
-find /usr/lib -name "main.sh" -path "*/pywalfox/bin/*" -exec chmod +x {} \;
-
-cat <<EOF > /usr/lib64/mozilla/native-messaging-hosts/pywalfox.json
-{
-    "name": "pywalfox",
-    "description": "Browser daemon for pywalfox",
-    "path": "/usr/bin/pywalfox",
-    "type": "stdio",
-    "allowed_extensions": [
-        "pywalfox@frewacom.org"
-    ]
-}
-EOF
 
 # --- 5. CLEANUP ---
 log "Disabling Copr repos..."
